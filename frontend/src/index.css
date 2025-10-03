@@ -1,0 +1,78 @@
+/* src/index.css (CSS Layout Mới) */
+
+/* Đặt lại các thiết lập mặc định */
+html, body, #root {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif; /* Chọn font phù hợp */
+    background-color: #f7f9fc;
+}
+
+/* 1. Thiết lập Grid Layout cho toàn bộ ứng dụng */
+.app-container {
+    display: grid;
+    /* Định nghĩa 2 cột: Sidebar cố định 250px và Content chiếm phần còn lại (1fr) */
+    grid-template-columns: 250px 1fr; 
+    /* Định nghĩa 2 hàng: Header cố định 60px và Pages chiếm phần còn lại */
+    grid-template-rows: 1fr; /* Chỉ 1 hàng logic, vì Sidebar và Content sẽ chia 1 hàng này */
+    min-height: 100vh;
+}
+
+/* 2. Styling cho Sidebar */
+.sidebar {
+    /* Đặt Sidebar vào cột 1, trải dài toàn bộ chiều cao */
+    grid-column: 1;
+    grid-row: 1 / span 2; /* Trải dài qua 2 hàng (Header và Content) */
+    background-color: #1e1e4a; /* Màu tím đậm */
+    color: white;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    padding-top: 20px;
+    z-index: 10; /* Đảm bảo Sidebar luôn ở trên cùng */
+}
+
+/* Thêm padding/style cho Sidebar (bạn có thể đưa vào Sidebar.css) */
+.sidebar .nav-links {
+    padding-top: 20px;
+}
+.sidebar .nav-item {
+    display: block;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: #b3c0e3; /* Màu chữ nhạt */
+    transition: background-color 0.3s;
+}
+.sidebar .nav-item:hover, .sidebar .nav-item.active {
+    background-color: #2a2a6b; /* Nền sáng hơn khi hover/active */
+    color: white;
+    border-left: 3px solid #6c5ce7; /* Thanh active màu tím */
+}
+
+
+/* 3. Khu vực Nội dung Chính (Bao gồm Header và Pages) */
+.main-content-wrapper {
+    grid-column: 2; /* Nằm ở cột 2 (cột chính) */
+    display: grid;
+    /* Chia cột 2 thành 2 hàng: Header cố định 60px và Content cuộn */
+    grid-template-rows: 60px 1fr; 
+    min-height: 100vh;
+}
+
+/* 4. Styling cho Header */
+.top-header {
+    grid-row: 1; /* Nằm ở hàng đầu tiên của cột 2 */
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    z-index: 5;
+    font-weight: bold;
+}
+
+/* 5. Khu vực Pages (Nội dung) */
+.content-area {
+    grid-row: 2; /* Nằm ở hàng thứ hai của cột 2 */
+    padding: 20px;
+    overflow-y: auto; /* Cho phép cuộn nội dung pages */
+}

@@ -1,0 +1,133 @@
+/* frontend/src/pages/DataSensor.css */
+
+/* --- Layout chung --- */
+.data-sensor-page {
+    padding: 20px;
+}
+
+.table-container {
+    overflow-x: auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    margin-top: 20px;
+}
+
+/* --- Bảng --- */
+.sensor-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sensor-table th,
+.sensor-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.sensor-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    color: #333;
+}
+
+.sensor-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* --- Hiệu ứng Sắp xếp --- */
+.sensor-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sensor-table th.sortable:hover {
+    background-color: #e9e9e9;
+    color: #5d5d81;
+}
+
+/* --- Căn chỉnh ID và Giá trị số (Cột 1, 2, 3, 4) --- */
+.sensor-table th:first-child,
+.sensor-table td:first-child {
+    width: 5%; /* ID */
+    text-align: right;
+    padding-right: 25px;
+}
+
+.sensor-table th:nth-child(2),
+.sensor-table td:nth-child(2),
+.sensor-table th:nth-child(3),
+.sensor-table td:nth-child(3),
+.sensor-table th:nth-child(4),
+.sensor-table td:nth-child(4) {
+    text-align: right; /* Căn chỉnh các giá trị số */
+}
+
+
+/* --- Control và Search Bar --- */
+.table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.search-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.filter-select, .search-group input {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.search-button {
+    padding: 8px 15px;
+    background-color: #5d5d81; 
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.search-button:hover {
+    background-color: #4a4a6b;
+}
+
+/* --- Phân Trang (Pagination) --- */
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; 
+    margin-top: 15px;
+    font-size: 0.95rem;
+}
+
+.pagination-controls span, .pagination-controls select {
+    margin: 0 5px;
+}
+
+.pagination-controls button {
+    padding: 5px 10px;
+    margin-left: 5px;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.pagination-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-controls select {
+    padding: 5px 8px;
+}

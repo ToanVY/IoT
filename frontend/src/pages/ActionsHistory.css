@@ -1,0 +1,142 @@
+/* frontend/src/pages/ActionsHistory.css */
+
+/* --- Layout chung --- */
+.actions-history-page {
+    padding: 20px;
+}
+
+.table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.search-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.filter-select, .search-group input {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.search-button {
+    padding: 8px 15px;
+    background-color: #5d5d81; 
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.search-button:hover {
+    background-color: #4a4a6b;
+}
+
+/* --- Container Bảng (table-container dùng cho cả 2 trang) --- */
+.table-container {
+    overflow-x: auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    padding: 15px;
+}
+
+/* --- Bảng (actions-table dùng chung trong Table.jsx) --- */
+.actions-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.actions-table th,
+.actions-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #f4f4f4;
+    font-size: 0.95rem;
+}
+
+.actions-table th {
+    background-color: #f7f7f7;
+    font-weight: 600;
+    color: #555;
+    user-select: none;
+}
+
+.actions-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Sắp xếp */
+.actions-table th.sortable {
+    cursor: pointer;
+}
+
+.actions-table th:hover {
+    background-color: #ebebeb;
+}
+
+/* Căn chỉnh ID và Số sang phải (Dùng cho cả ActionsHistory và DataSensor) */
+.actions-table td.align-right {
+    text-align: right;
+    font-weight: 500;
+}
+.actions-table th.align-right-header {
+    text-align: right;
+}
+
+.actions-table th:first-child,
+.actions-table td:first-child {
+    width: 10%; /* Điều chỉnh lại độ rộng cho cột ID */
+    text-align: right; 
+    padding-right: 25px; 
+    font-size: 0.9rem;
+}
+
+
+/* Styling cho cột Status (Chỉ trong ActionsHistory) */
+.actions-table td.status-on {
+    color: green;
+    font-weight: bold;
+}
+.actions-table td.status-off {
+    color: red;
+    font-weight: bold;
+}
+
+/* --- Phân Trang (Pagination) --- */
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; 
+    margin-top: 15px;
+    font-size: 0.95rem;
+    gap: 10px;
+}
+
+.pagination-controls span, .pagination-controls .page-size-select {
+    margin: 0 5px;
+}
+
+.pagination-controls .page-button {
+    padding: 5px 10px;
+    background-color: #5d5d81; 
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.pagination-controls .page-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #ccc;
+}

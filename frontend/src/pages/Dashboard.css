@@ -1,0 +1,31 @@
+/* src/pages/Dashboard.css */
+.dashboard-page {
+    padding: 20px;
+}
+.dashboard-page h2 {
+    color: #333;
+    margin-bottom: 25px;
+    font-size: 1.8rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+.sensor-summary-cards {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+.chart-area {
+    height: 400px; 
+    margin-bottom: 30px;
+    padding: 20px;
+}
+.device-control-area {
+    display: flex;
+    gap: 20px;
+}
+.card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    flex: 1; 
+}
