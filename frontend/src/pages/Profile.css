@@ -1,166 +1,259 @@
-/* src/pages/Profile.css */
+/* src/pages/Profile.css (PHIÊN BẢN CUỐI CÙNG - FULL WIDTH KHÔNG BỊ CẮT ẢNH) */
 
 .profile-page {
-    /* Đảm bảo trang Profile chiếm toàn bộ không gian nội dung chính */
-    padding: 20px;
-    background-color: #f0f2f5; /* Màu nền nhẹ nhàng cho toàn trang */
-    min-height: calc(100vh - 60px); /* Đảm bảo đủ chiều cao */
+    /* Thêm padding ngang để tạo không gian an toàn cho thẻ profile */
+    padding: 0 30px; 
+    background-color: #f4f7f9; 
+    min-height: calc(100vh - 60px); 
 }
 
 /* --- Card Profile Chính --- */
 .profile-card {
-    background: linear-gradient(135deg, #ffffff 60%, #e0e0f8 100%); /* Nền gradient nhẹ */
+    background: #ffffff; 
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    max-width: 900px; /* Giới hạn chiều rộng card */
-    margin: 0 auto;
-    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); 
+    
+    /* Giữ nguyên Full Width */
+    max-width: none; 
+    margin: 0; 
+    
+    overflow: visible; 
 }
 
-/* --- Header (Ảnh và Tên) --- */
+/* ----------------------------------
+        HEADER SECTION
+---------------------------------- */
 .profile-header {
     display: flex;
-    align-items: flex-start;
-    padding: 30px;
-    border-bottom: 1px solid #eee;
-    background: linear-gradient(to right, #ffffff, #f7f7fc);
+    align-items: flex-end; 
+    /* ⬅️ CHỈNH SỬA: TĂNG PADDING LEFT để đẩy avatar vào, tránh bị cắt */
+    padding: 10px 30px 10px 50px; /* Top 10px, Right 30px, Bottom 10px, Left 50px */
+    padding-top: 40px; 
+    border-bottom: 1px solid #f0f0f0; 
+    background: transparent; 
     position: relative;
 }
 
-/* Vùng màu tím nhạt phía trên */
+/* Vùng màu tím phía trên (Nền) */
 .profile-header::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 100px; 
-    background: linear-gradient(135deg, #a0a0ff, #e0e0ff); /* Màu gradient tím nhạt */
+    height: 100%; 
+    background: linear-gradient(135deg, #7c4dff 10%, #b388ff 90%);
     z-index: 0;
+    border-radius: 12px 12px 0 0; 
 }
 
+/* --- Avatar & Thay đổi --- */
 .avatar-section {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-right: 30px;
-    z-index: 1; /* Đảm bảo ở trên lớp gradient */
+    z-index: 1; 
+    
+    /* Nhấc khối avatar lên trên */
+    margin-top: -60px; 
 }
-
 .avatar-placeholder {
-    width: 120px;
-    height: 120px;
+    width: 140px;
+    height: 140px;
     border-radius: 50%;
     overflow: hidden;
-    border: 4px solid white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    border: 5px solid #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     margin-bottom: 10px;
+    transition: transform 0.3s;
+    cursor: pointer;
+    background: #fff; /* nền trắng viền avatar */
 }
 
 .profile-avatar {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    border-radius: 50%;
+    object-fit: cover;       /* lấp đầy khung, không còn viền xám */
+    object-position: center; /* canh giữa khuôn mặt */
+    display: block;
 }
 
+
+.avatar-placeholder:hover {
+    transform: scale(1.03);
+}
+
+.avatar-section .btn-secondary {
+    background-color: #e0e0f8; 
+    color: #4b0082;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+/* --- Info Intro (Tên và Mã SV) --- */
 .info-intro {
     flex-grow: 1;
-    padding-top: 10px;
     z-index: 1;
+    margin-right: 20px; 
+    padding-bottom: 25px; 
 }
 
 .info-intro h3 {
     margin-top: 0;
     margin-bottom: 5px;
-    color: #333;
-    font-size: 1.5rem;
+    color: white; 
+    font-size: 1.8rem; 
+    font-weight: 700;
 }
 
 .info-intro p {
-    color: #777;
+    color: #e0e0ff; 
+    font-weight: 600;
     margin: 0;
 }
 
 /* --- Nút Sửa/Lưu --- */
 .profile-header .btn-primary {
-    background-color: #4b0082; /* Màu tím đậm */
+    background-color: #4b0082; 
     color: white;
     border: none;
-    padding: 8px 20px;
-    border-radius: 6px;
+    padding: 10px 25px; 
+    border-radius: 8px; 
     cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s;
+    font-weight: 600;
+    transition: background-color 0.2s, transform 0.1s;
     z-index: 1;
 }
 
 .profile-header .btn-primary:hover {
     background-color: #6a0dad;
+    transform: translateY(-1px);
 }
 
-.avatar-section .btn-secondary {
-    background-color: #f0f0f0;
-    color: #4b0082;
-    border: 1px solid #ccc;
-    padding: 6px 15px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-/* --- Chi tiết Form --- */
+/* ----------------------------------
+        DETAILS SECTION
+---------------------------------- */
 .profile-details {
-    padding: 30px 50px;
+    padding: 30px 0; 
 }
 
 .detail-row {
     display: grid;
-    grid-template-columns: 150px 1fr; /* Cố định label 150px */
+    grid-template-columns: 180px 1fr; 
     align-items: center;
-    margin-bottom: 20px;
-    gap: 20px;
+    gap: 30px; 
     position: relative;
+    border-bottom: 1px solid #f0f0f0; 
+    /* ⬅️ CHỈNH SỬA: Đảm bảo padding ngang khớp với padding-right của header */
+    padding: 15px 30px; 
+}
+
+.detail-row:last-child {
+    border-bottom: none; 
 }
 
 .detail-row label {
-    font-weight: 500;
-    color: #444;
+    font-weight: 600; 
+    color: #555;
+    white-space: nowrap; 
 }
 
+/* --- Styling Giá trị --- */
+.profile-value, 
+.detail-row input:not(.editable) {
+    font-size: 1rem;
+    color: #222;
+    padding: 0; 
+    border: none;
+    background-color: transparent;
+    cursor: default;
+    box-shadow: none;
+    line-height: 1.5; 
+}
+
+/* Styling cho liên kết */
+.profile-link {
+    color: #4b0082; 
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.profile-link:hover {
+    text-decoration: underline;
+    color: #7c4dff;
+}
+
+/* Input khi ở chế độ chỉnh sửa */
 .detail-row input {
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 6px;
-    font-size: 1rem;
     background-color: #f9f9f9;
-    color: #333;
     transition: border-color 0.2s, background-color 0.2s;
 }
 
-/* Input khi ở chế độ chỉnh sửa */
 .detail-row input.editable {
     background-color: white;
-    border-color: #4b0082;
-    box-shadow: 0 0 0 1px #4b0082;
+    border-color: #7c4dff; 
+    box-shadow: 0 0 0 1px #7c4dff;
 }
 
-/* Input khi KHÔNG ở chế độ chỉnh sửa */
-.detail-row input:not(.editable) {
-    border: none;
-    background-color: transparent;
-    cursor: default;
-    box-shadow: none;
-    padding-left: 0;
-    color: #222;
-}
-
+/* --- Email Icon --- */
 .email-icon {
     position: absolute;
-    right: 15px;
+    /* ⬅️ CHỈNH SỬA: Căn chỉnh right theo padding 30px mới */
+    right: 30px; 
     top: 50%;
     transform: translateY(-50%);
-    font-size: 1.2rem;
-    pointer-events: none; /* Không cản trở click vào input */
-    color: #999;
+    font-size: 1.4rem; 
+    color: #7c4dff; 
+    z-index: 2; 
+}
+
+
+/* ----------------------------------
+        RESPONSIVE DESIGN
+---------------------------------- */
+@media (max-width: 768px) {
+    .profile-card {
+        border-radius: 0;
+    }
+    .profile-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding-top: 60px; 
+        padding-bottom: 15px;
+    }
+    .avatar-section {
+        margin-top: -80px; 
+    }
+    .info-intro {
+        margin-top: 15px;
+        margin-left: 0;
+        padding-bottom: 0;
+    }
+    .profile-header .btn-primary {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+    .detail-row {
+        grid-template-columns: 1fr; 
+        gap: 5px;
+        padding: 10px 20px; 
+    }
+    .email-icon {
+        right: 20px; 
+    }
 }

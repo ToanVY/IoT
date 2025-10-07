@@ -2,44 +2,47 @@
 
 .device-card {
     /* Kế thừa từ class card chung */
-    padding: 25px;
+    padding: 15px;
     text-align: center;
     border: 1px solid #eee;
-    min-width: 250px;
+    min-width: 200px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
+    height: 180px; /* Cố định chiều cao */
 }
 
 .device-icon {
-    font-size: 3rem;
-    margin-bottom: 10px;
+    font-size: 2.5rem;
+    margin-bottom: 8px;
 }
 
 .device-label {
-    margin-top: 0;
+    margin: 0;
     color: #333;
-    font-size: 1.2rem;
+    font-size: 1rem;
+    font-weight: bold;
 }
 
 .device-status {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: #666;
-    margin-bottom: 15px;
+    margin: 5px 0;
 }
 
 /* --- Style Nút Toggle --- */
 .toggle-button {
-    padding: 10px 30px;
+    padding: 8px 20px;
     border: none;
-    border-radius: 25px;
+    border-radius: 20px;
     cursor: pointer;
     font-weight: bold;
     color: white;
     transition: background-color 0.3s, transform 0.1s;
     width: 100%;
-    max-width: 150px;
+    max-width: 120px;
+    font-size: 0.9rem;
 }
 
 .toggle-button:hover {
@@ -58,18 +61,212 @@
 
 /* --- Thẻ Theo Trạng Thái (Visual Feedback) --- */
 
-/* Đèn BẬT */
+/* Đèn BẬT - Có màu vàng sáng */
 .on-light {
     border-color: #ffeb3b;
     box-shadow: 0 0 15px rgba(255, 235, 59, 0.5);
+    background-color: #fffde7;
 }
-/* Điều hòa BẬT */
-.on-ac {
-    background-color: #e3f2fd;
-    border-color: #2196f3;
+
+/* Đèn TẮT - Không có màu vàng */
+.off-light {
+    border-color: #ccc;
+    background-color: #f5f5f5;
+    color: #666;
 }
-/* Quạt BẬT */
+
+/* Đèn TẮT - Icon bóng đèn không sáng */
+.off-light .device-icon {
+    filter: grayscale(100%);
+    opacity: 0.6;
+}
+
+/* Quạt BẬT - Hiệu ứng xoay */
 .on-fan {
     background-color: #f0f0f0;
     border-color: #9e9e9e;
+}
+
+.on-fan .device-icon {
+    animation: rotate 2s linear infinite;
+}
+
+/* Quạt TẮT - Không xoay */
+.off-fan {
+    background-color: #f5f5f5;
+    border-color: #ccc;
+}
+
+.off-fan .device-icon {
+    animation: none;
+}
+
+/* Icon điều hòa bằng CSS */
+.device-icon.ac-unit {
+    font-size: 0;
+    width: 60px;
+    height: 40px;
+    background: linear-gradient(135deg, #87CEEB, #4682B4);
+    border-radius: 8px;
+    position: relative;
+    margin: 0 auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    border: 2px solid #2E8B57;
+}
+
+/* Chi tiết điều hòa - Bảng điều khiển */
+.device-icon.ac-unit::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    height: 3px;
+    background: #2E8B57;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Khe thoát khí */
+.device-icon.ac-unit::after {
+    content: '';
+    position: absolute;
+    bottom: 10px;
+    left: 15px;
+    right: 15px;
+    height: 12px;
+    background: linear-gradient(90deg, #4682B4, #87CEEB);
+    border-radius: 0 0 6px 6px;
+    border-top: 1px solid #2E8B57;
+}
+
+/* Điều hòa BẬT - Hiệu ứng khói */
+.on-ac {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+    position: relative;
+}
+
+.on-ac .device-icon.ac-unit::after {
+    background: linear-gradient(90deg, #4682B4, #87CEEB);
+    animation: ac-flow 2s ease-in-out infinite;
+}
+
+/* Hiệu ứng khói khi bật - Vị trí bên cạnh icon */
+.on-ac::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 6px;
+    height: 30px;
+    background: linear-gradient(to bottom, #87CEEB, transparent);
+    animation: smoke 1.5s ease-in-out infinite;
+    z-index: 1;
+    border-radius: 3px;
+    box-shadow: 0 0 8px rgba(135, 206, 235, 0.5);
+}
+
+.on-ac::after {
+    content: '';
+    position: absolute;
+    top: 25px;
+    right: 15px;
+    width: 8px;
+    height: 35px;
+    background: linear-gradient(to bottom, #B0E0E6, transparent);
+    animation: smoke 1.8s ease-in-out infinite;
+    animation-delay: 0.3s;
+    z-index: 1;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(176, 224, 230, 0.6);
+}
+
+/* Thêm luồng khí thứ 3 - Bên trái icon */
+.on-ac {
+    position: relative;
+}
+
+.on-ac .device-card::before {
+    content: '';
+    position: absolute;
+    top: 30px;
+    left: 20px;
+    width: 5px;
+    height: 25px;
+    background: linear-gradient(to bottom, #E0F6FF, transparent);
+    animation: smoke 2.2s ease-in-out infinite;
+    animation-delay: 0.6s;
+    z-index: 1;
+    border-radius: 2px;
+    box-shadow: 0 0 6px rgba(224, 246, 255, 0.4);
+}
+
+/* Điều hòa TẮT - Không có hiệu ứng */
+.off-ac {
+    background-color: #f5f5f5;
+    border-color: #ccc;
+}
+
+.off-ac .device-icon.ac-unit {
+    filter: grayscale(50%);
+    opacity: 0.7;
+}
+
+.off-ac::before,
+.off-ac::after {
+    display: none;
+}
+
+/* Animations */
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes blow {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+@keyframes smoke {
+    0% {
+        opacity: 0;
+        transform: translateY(0) scale(0.3);
+    }
+    20% {
+        opacity: 0.6;
+        transform: translateY(-5px) scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(-15px) scale(1.1);
+    }
+    80% {
+        opacity: 0.7;
+        transform: translateY(-25px) scale(1.3);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-35px) scale(1.5);
+    }
+}
+
+@keyframes ac-flow {
+    0%, 100% {
+        background: linear-gradient(90deg, #4682B4, #87CEEB);
+    }
+    50% {
+        background: linear-gradient(90deg, #87CEEB, #4682B4);
+    }
 }

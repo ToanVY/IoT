@@ -73,6 +73,7 @@ html, body, #root {
 /* 5. Khu vực Pages (Nội dung) */
 .content-area {
     grid-row: 2; /* Nằm ở hàng thứ hai của cột 2 */
-    padding: 20px;
-    overflow-y: auto; /* Cho phép cuộn nội dung pages */
+    padding: 0;
+    overflow: hidden; /* Không cho phép cuộn */
+    height: calc(100vh - 60px); /* Trừ đi header */
 }

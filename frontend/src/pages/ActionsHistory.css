@@ -140,3 +140,32 @@
     cursor: not-allowed;
     background-color: #ccc;
 }
+.filter-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-buttons span {
+    font-weight: 500;
+    color: #444;
+}
+
+.filter-buttons button {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    background-color: #f7f7f7;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-buttons button:hover {
+    background-color: #e3e3e3;
+}
+
+.filter-buttons button.active {
+    background-color: #5d5d81;
+    color: white;
+    border-color: #5d5d81;
+}

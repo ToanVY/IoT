@@ -29,7 +29,7 @@ const App = () => {
                     {/* Tạm thời dùng div cho Header nếu chưa có component */}
                     <div className="top-header">
                         {/* Bạn có thể thêm các control như Search, Type, Save vào đây */}
-                        <div className="header-title">Dashboard Home</div>
+                        <div className="header-title">Web IoT</div>
                     </div>
                     
                     {/* Nội dung Pages (Khu vực cuộn được) */}

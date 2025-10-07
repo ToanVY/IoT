@@ -1,6 +1,11 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
-import App from "./App";
-import "./index.css"; // Tailwind build
+import React from 'react';
+import ReactDOM from 'react-dom/client'; // Sử dụng client API cho React 18
+import './index.css';
+import App from './App';
 
-createRoot(document.getElementById("root")).render(<App />);
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);

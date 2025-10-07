@@ -1,0 +1,141 @@
+# backend/swagger.yaml
+openapi: 3.0.0
+info:
+  title: IoT Device Management API (Node.js/Express)
+  version: 1.0.0
+  description: |
+    Tài liệu API REST cho hệ thống giám sát và điều khiển thiết bị IoT.
+    - **Backend:** Node.js, Express, MySQL.
+    - **Dữ liệu Real-time:** Dữ liệu cảm biến được đẩy qua Socket.IO (không phải REST).
+servers:
+  - url: http://localhost:5000/api
+    description: API Endpoint Chính
+
+paths:
+  /sensors/latest:
+    get:
+      tags:
+        - Sensor Data
+      summary: Lấy dữ liệu cảm biến mới nhất từ MySQL
+      description: Truy vấn dữ liệu nhiệt độ, độ ẩm, ánh sáng được lưu trữ gần đây nhất.
+      responses:
+        '200':
+          description: Dữ liệu cảm biến mới nhất.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  temperature:
+                    type: number
+                  humidity:
+                    type: number
+                  light:
+                    type: integer
+                  created_at:
+                    type: string
+                    format: date-time
+        '500':
+          description: Lỗi máy chủ hoặc kết nối CSDL.
+
+  /sensors/history:
+    get:
+      tags:
+        - Sensor Data
+      summary: Lấy dữ liệu cảm biến lịch sử
+      description: Truy vấn danh sách dữ liệu cảm biến theo giới hạn (limit).
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 50
+          description: Số lượng bản ghi lịch sử muốn lấy.
+      responses:
+        '200':
+          description: Danh sách các bản ghi cảm biến lịch sử.
+
+  /devices/control:
+    post:
+      tags:
+        - Device Control
+      summary: Gửi lệnh điều khiển thiết bị (LED/FAN) qua MQTT
+      description: Backend sẽ chuyển lệnh này tới thiết bị qua MQTT Broker.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - device
+                - state
+              properties:
+                device:
+                  type: string
+                  enum: [led, fan]
+                  description: Thiết bị cần điều khiển.
+                state:
+                  type: string
+                  enum: [ON, OFF]
+                  description: Trạng thái mong muốn.
+      responses:
+        '200':
+          description: Lệnh điều khiển đã được gửi thành công qua MQTT.
+        '400':
+          description: Thiếu tham số hoặc dữ liệu không hợp lệ.
+
+  /devices/actions:
+    get:
+      tags:
+        - Device Control
+      summary: Lấy lịch sử các hành động điều khiển
+      description: Truy vấn danh sách các lệnh ON/OFF đã được gửi đi và lưu vào CSDL.
+      responses:
+        '200':
+          description: Danh sách lịch sử hành động.
+
+  /devices/profile:
+    post:
+      tags:
+        - User Profile
+      summary: Cập nhật thông tin hồ sơ và ảnh đại diện
+      description: Dùng để cập nhật tên, mã SV và tải lên file ảnh đại diện mới.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+                  description: File ảnh đại diện (được xử lý bởi Multer).
+                fullName:
+                  type: string
+                studentId:
+                  type: string
+                  description: Mã sinh viên (dùng để đặt tên file ảnh).
+      responses:
+        '200':
+          description: Hồ sơ và ảnh đại diện được cập nhật thành công.
+        '400':
+          description: Lỗi dữ liệu hoặc định dạng file (ví dụ: file quá lớn).
+
+  /uploads/{path}:
+    get:
+      tags:
+        - Static Files
+      summary: Tải ảnh đại diện người dùng
+      description: Endpoint để Frontend tải các file ảnh đã được Backend lưu trữ.
+      parameters:
+        - in: path
+          name: path
+          required: true
+          schema:
+            type: string
+          description: Đường dẫn tương đối của file (ví dụ: 'avatars/B22DCCN730-16788888.png').
+      responses:
+        '200':
+          description: Trả về file ảnh.

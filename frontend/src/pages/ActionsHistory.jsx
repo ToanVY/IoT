@@ -1,36 +1,35 @@
 // src/pages/ActionsHistory.jsx
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { getActionsHistory } from '../api'; // Giả định hàm API
-import Table from '../components/Table'; // Component Bảng chung
-import './ActionsHistory.css'; // File CSS đồng bộ
+import { getActionsHistory } from '../api'; 
+import Table from '../components/Table'; 
+import './ActionsHistory.css'; 
 
 const ActionsHistory = () => {
     const [actions, setActions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     
-    // States cho điều khiển bảng
+    // States
     const [searchTerm, setSearchTerm] = useState('');
     const [searchType, setSearchType] = useState('all'); 
-    
-    // States cho sắp xếp (KHỚP VỚI KEYS TRONG DỮ LIỆU)
-    const [sortBy, setSortBy] = useState('Time'); 
+    const [sortBy, setSortBy] = useState('time'); 
     const [sortOrder, setSortOrder] = useState('desc'); 
     
-    // Headers cho component Table
-    const actionHeaders = ['ID', 'Device', 'Status', 'Time'];
+    // Bộ lọc riêng
+    const [deviceFilter, setDeviceFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState('all');
 
-    // Tùy chọn tìm kiếm
+    // Headers cho component Table
+    const actionHeaders = ['id', 'device', 'status', 'time'];
+
+    // Tùy chọn tìm kiếm (chỉ giữ lại all, time, id)
     const searchOptions = [
         { value: 'all', label: 'Tất cả' },
-        { value: 'Time', label: 'Thời gian' },
-        { value: 'Device', label: 'Thiết bị' },
-        { value: 'Status', label: 'Trạng thái' },
-        { value: 'ID', label: 'ID' },
+        { value: 'time', label: 'Thời gian' },
+        { value: 'id', label: 'ID' },
     ];
     
-    // Hàm định dạng thời gian
     const formatTime = (timeString) => {
         if (!timeString) return '--';
         const date = new Date(timeString);
@@ -56,7 +55,6 @@ const ActionsHistory = () => {
         fetchActions();
     }, []);
 
-    // HÀM XỬ LÝ SẮP XẾP
     const handleSortChange = (newSortBy) => {
         if (sortBy === newSortBy) {
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -66,52 +64,60 @@ const ActionsHistory = () => {
         }
     };
     
-    // LOGIC LỌC/SẮP XẾP/CHUẨN BỊ DỮ LIỆU DÙNG useMemo
     const displayData = useMemo(() => {
-        let currentActions = [...actions];
+        let currentActions = actions.map(item => ({
+            id: item.ID || item.id,
+            device: (item.Device || item.device || '').toLowerCase(),
+            status: (item.Status || item.status || '').toUpperCase(),
+            time: item.Time || item.time,
+        }));
         
-        // 1. Lọc theo Tìm kiếm và Loại (SearchType) (Giữ nguyên)
+        // 1. Lọc theo Tìm kiếm
         if (searchTerm) {
             const lowerSearch = searchTerm.toLowerCase();
             
             currentActions = currentActions.filter(action => {
-                const formattedTime = formatTime(action.Time).toLowerCase(); 
+                const formattedTime = formatTime(action.time).toLowerCase(); 
                 
                 if (searchType === 'all') {
-                    const actionId = String(action.ID || action.id || '').toLowerCase(); 
-                    const device = String(action.Device || '').toLowerCase();
-                    const status = String(action.Status || '').toLowerCase();
-                    const searchString = `${actionId} ${device} ${status} ${formattedTime}`;
-
+                    const searchString = `${action.id} ${action.device} ${action.status} ${formattedTime}`;
                     return searchString.includes(lowerSearch);
                 } 
-                
-                if (searchType === 'Time') {
+                if (searchType === 'time') {
                     return formattedTime.includes(lowerSearch);
                 } 
-                
-                const value = action[searchType];
-                return String(value ?? '').toLowerCase().includes(lowerSearch);
+                if (searchType === 'id') {
+                    return String(action.id).toLowerCase().includes(lowerSearch);
+                }
+                return true;
             });
         }
 
-        // 2. Sắp xếp (ĐÃ SỬA: Thêm logic sắp xếp số cho ID)
+        // 2. Lọc theo Device
+        if (deviceFilter !== 'all') {
+            currentActions = currentActions.filter(a => a.device === deviceFilter);
+        }
+
+        // 3. Lọc theo Status
+        if (statusFilter !== 'all') {
+            currentActions = currentActions.filter(a => a.status === statusFilter.toUpperCase());
+        }
+
+        // 4. Sắp xếp
         if (sortBy) {
             currentActions.sort((a, b) => {
                 const aValue = a[sortBy];
                 const bValue = b[sortBy];
                 
-                // --- Sắp xếp Số (ID) ---
-                if (sortBy === 'ID') {
-                    const idA = parseInt(aValue || a.id); // Lấy ID (có thể là ID hoặc id)
-                    const idB = parseInt(bValue || b.id);
+                if (sortBy === 'id') {
+                    const idA = parseInt(aValue);
+                    const idB = parseInt(bValue);
                     if (idA < idB) return sortOrder === 'asc' ? -1 : 1;
                     if (idA > idB) return sortOrder === 'asc' ? 1 : -1;
                     return 0;
                 }
                 
-                // --- Sắp xếp Thời gian ---
-                if (sortBy === 'Time') {
+                if (sortBy === 'time') {
                     const aTime = new Date(aValue).getTime();
                     const bTime = new Date(bValue).getTime();
                     if (aTime < bTime) return sortOrder === 'asc' ? -1 : 1;
@@ -119,24 +125,20 @@ const ActionsHistory = () => {
                     return 0;
                 }
                 
-                // --- Sắp xếp Chuỗi (còn lại) ---
                 const valA = String(aValue ?? '').toLowerCase();
                 const valB = String(bValue ?? '').toLowerCase();
-
                 if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
                 if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
                 return 0;
             });
         }
 
-        // 3. CHUẨN BỊ DỮ LIỆU ĐỂ HIỂN THỊ (Định dạng thời gian)
-        const formattedData = currentActions.map(item => ({
+        // 5. Định dạng dữ liệu cuối cùng
+        return currentActions.map(item => ({
             ...item,
-            Time: formatTime(item.Time) 
+            time: formatTime(item.time),
         }));
-        
-        return formattedData;
-    }, [actions, searchTerm, searchType, sortBy, sortOrder]);
+    }, [actions, searchTerm, searchType, sortBy, sortOrder, deviceFilter, statusFilter]);
 
 
     if (isLoading) return <div className="actions-history-page">Đang tải lịch sử...</div>;
@@ -150,6 +152,7 @@ const ActionsHistory = () => {
 
             <div className="table-controls">
                 <div className="search-group">
+                    {/* Search type */}
                     <select 
                         className="filter-select" 
                         value={searchType}
@@ -162,6 +165,7 @@ const ActionsHistory = () => {
                         ))}
                     </select>
                     
+                    {/* Search input */}
                     <input 
                         type="text" 
                         placeholder={`Tìm kiếm trong ${currentSearchLabel}...`} 
@@ -169,6 +173,29 @@ const ActionsHistory = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     <button className="search-button">Search</button>
+
+                    {/* Device filter */}
+                    <select 
+                        className="filter-select"
+                        value={deviceFilter}
+                        onChange={(e) => setDeviceFilter(e.target.value)}
+                    >
+                        <option value="all">Tất cả thiết bị</option>
+                        <option value="light">Light</option>
+                        <option value="fan">Fan</option>
+                        <option value="ac">AC</option>
+                    </select>
+
+                    {/* Status filter */}
+                    <select 
+                        className="filter-select"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                        <option value="all">Tất cả trạng thái</option>
+                        <option value="ON">ON</option>
+                        <option value="OFF">OFF</option>
+                    </select>
                 </div>
             </div>
 

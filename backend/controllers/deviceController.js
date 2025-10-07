@@ -1,25 +1,30 @@
 // backend/controllers/deviceController.js
 
-import pool from '../dbConfig.js'; // Đảm bảo import pool đúng cách
-import path from 'path';
+import { io, deviceStates } from "../server.js"; // ⚠️ import từ server.js
+import pool from '../dbConfig.js';
 
-// --- HÀM CŨ: ĐIỀU KHIỂN THIẾT BỊ ---
-// Điều khiển thiết bị (light | fan | ac)
+// --- ĐIỀU KHIỂN THIẾT BỊ ---
 export const controlDevice = async (req, res) => {
     try {
         const mqttClient = req.app.get("mqttClient");
-        const pool = req.app.get("db");      // lấy pool MySQL từ server.js
+        const db = req.app.get("db");      
 
-        const device = req.params.device; // ví dụ: light, fan, ac
-        const { status } = req.body;      // "ON" hoặc "OFF"
+        const device = req.params.device; // light | fan | ac
+        const { status } = req.body;      // "on" hoặc "off" (chữ thường theo FE)
+
         const topic = `esp32/control/${device}`;
 
-        // Gửi lệnh MQTT tới ESP32
-        mqttClient.publish(topic, status);
+        // 1. Gửi lệnh MQTT tới ESP32
+        mqttClient.publish(topic, status.toUpperCase()); // ESP32 thường dùng ON/OFF
 
-        // Lưu lịch sử vào MySQL
-        // Giả định bảng là `Actions`
-        await pool.query(
+        // 2. Cập nhật trạng thái thiết bị trong biến toàn cục
+        deviceStates[device] = status;
+
+        // 3. Phát lại cho tất cả frontend
+        io.emit("deviceStates", deviceStates);
+
+        // 4. Lưu lịch sử vào MySQL
+        await db.query(
             "INSERT INTO Actions (Device, Status) VALUES (?, ?)",
             [device, status]
         );
@@ -31,14 +36,12 @@ export const controlDevice = async (req, res) => {
     }
 };
 
-// --- HÀM CŨ: LỊCH SỬ HÀNH ĐỘNG ---
-// Lấy danh sách lịch sử điều khiển
+// --- LỊCH SỬ HÀNH ĐỘNG ---
 export const getActions = async (req, res) => {
     try {
-        const pool = req.app.get("db");
-        // Đảm bảo tên cột trong CSDL khớp: Device, Status, Time
-        const [rows] = await pool.query(
-            "SELECT ID, Device, Status, Time FROM Actions ORDER BY Time DESC LIMIT 500" // Tăng giới hạn lên 500
+        const db = req.app.get("db");
+        const [rows] = await db.query(
+            "SELECT ID, Device, Status, Time FROM Actions ORDER BY Time DESC LIMIT 500"
         );
         res.json(rows);
     } catch (err) {
@@ -47,21 +50,12 @@ export const getActions = async (req, res) => {
     }
 };
 
-// --- HÀM MỚI: CẬP NHẬT HỒ SƠ VÀ ẢNH ĐẠI DIỆN ---
-/**
- * Cập nhật hồ sơ người dùng (bao gồm file ảnh đại diện)
- * Endpoint: POST /api/devices/profile
- * Yêu cầu: Middleware Multer (upload.single('avatar')) phải chạy trước hàm này
- */
+// --- CẬP NHẬT HỒ SƠ ---
 export const updateProfile = async (req, res) => {
-    const pool = req.app.get("db"); 
-    const userId = 1; // ⚠️ Cần thay đổi: Sử dụng ID người dùng thực tế (ví dụ: từ token/session)
-    
-    // Lấy dữ liệu text từ req.body (được Multer xử lý)
+    const db = req.app.get("db"); 
+    const userId = 1; // ⚠️ Tạm fix cứng
+
     const { fullName, studentId, github, figma, email } = req.body;
-    
-    // Đường dẫn ảnh mới (nếu Multer đã lưu file)
-    // Giả định Multer lưu vào thư mục 'uploads/avatars'
     const newAvatarPath = req.file ? `/avatars/${req.file.filename}` : null;
     
     try {
@@ -72,7 +66,6 @@ export const updateProfile = async (req, res) => {
         let params = [fullName, studentId, github, figma, email];
 
         if (newAvatarPath) {
-            // Nếu có ảnh mới, thêm trường avatar_url vào query và params
             query += ', avatar_url = ?';
             params.push(newAvatarPath); 
         }
@@ -80,19 +73,15 @@ export const updateProfile = async (req, res) => {
         query += ' WHERE id = ?';
         params.push(userId);
         
-        await pool.query(query, params);
+        await db.query(query, params);
 
-        // Trả về URL ảnh mới để frontend cập nhật ngay lập tức
         res.status(200).json({ 
             message: 'Cập nhật hồ sơ thành công!',
-            // Trả về URL hoàn chỉnh (ví dụ: http://localhost:5000/uploads/avatars/tenfile.jpg)
             newAvatarUrl: newAvatarPath ? `/uploads${newAvatarPath}` : undefined 
         });
 
     } catch (error) {
         console.error('❌ Lỗi khi cập nhật hồ sơ:', error);
-        // Trong trường hợp lỗi, cần xóa file vừa tải lên (nếu có)
-        // [Cần thêm logic xóa file ở đây nếu quá trình update CSDL thất bại]
         res.status(500).json({ message: 'Lỗi server khi cập nhật hồ sơ.' });
     }
 };

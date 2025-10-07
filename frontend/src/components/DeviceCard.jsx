@@ -18,11 +18,11 @@ const DeviceCard = ({ device, label, status, onToggle }) => {
             themeClass = isDeviceOn ? 'on-light' : 'off-light';
             break;
         case 'fan':
-            icon = '💨';
+            icon = '🌀';
             themeClass = isDeviceOn ? 'on-fan' : 'off-fan';
             break;
         case 'ac':
-            icon = '❄️';
+            icon = 'ac-unit';
             themeClass = isDeviceOn ? 'on-ac' : 'off-ac';
             break;
         default:
@@ -36,7 +36,9 @@ const DeviceCard = ({ device, label, status, onToggle }) => {
 
     return (
         <div className={`device-card card ${themeClass}`}>
-            <div className="device-icon">{icon}</div>
+            <div className={`device-icon ${icon === 'ac-unit' ? 'ac-unit' : ''}`}>
+                {icon === 'ac-unit' ? '' : icon}
+            </div>
             <h4 className="device-label">{label}</h4>
             <p className={`device-status status-${status}`}>
                 Trạng thái: <strong>{isDeviceOn ? 'ĐANG BẬT' : 'ĐANG TẮT'}</strong>

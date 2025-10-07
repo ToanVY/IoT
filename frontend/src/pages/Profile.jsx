@@ -1,13 +1,11 @@
-// src/pages/Profile.jsx (Đã sửa logic lưu và gửi ảnh)
+// src/pages/Profile.jsx (Final Version)
 
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import './Profile.css';
-// import { updateProfileAPI, uploadAvatarAPI } from '../api'; // Giả định hàm API
+// import { updateProfileAPI } from '../api'; // Giả định hàm API
 
 const Profile = () => {
     const fileInputRef = useRef(null);
-    
-    // THÊM STATE MỚI ĐỂ LƯU TRỮ FILE THÔ (File Object)
     const [avatarFile, setAvatarFile] = useState(null);
 
     const [userData, setUserData] = useState({
@@ -16,6 +14,8 @@ const Profile = () => {
         github: 'https://github.com/ToanVY/IoT.git',
         figma: 'https://www.figma.com/design/R03h45Jnuu58OsxUIhrxlv/IoT?node-id=0-1',
         email: 'letoan5204@gmail.com',
+        api: 'http://localhost:5000/apis/', // Trường API đã được thêm
+        report: 'http://localhost/phpmyadmin/index.php?route=/table/structure&db=iotdb&table=actions',
         avatarUrl: '/assets/profile-avatar.png'
     });
 
@@ -23,40 +23,35 @@ const Profile = () => {
 
     // --- LOGIC XỬ LÝ LƯU (SAVE) ---
     const handleEditToggle = async () => {
-        // Nếu đang ở chế độ chỉnh sửa (và sắp chuyển sang chế độ xem)
         if (isEditing) {
             try {
-                // 1. CHUẨN BỊ DỮ LIỆU GỬI ĐI
                 const formData = new FormData();
                 
-                // Thêm dữ liệu ảnh (Chỉ gửi nếu có file mới)
+                // 1. Thêm file ảnh (nếu có)
                 if (avatarFile) {
                     formData.append('avatar', avatarFile);
                 }
 
-                // Thêm các trường dữ liệu text (Nếu API của bạn dùng FormData)
+                // 2. Thêm dữ liệu text
                 formData.append('fullName', userData.fullName);
                 formData.append('studentId', userData.studentId);
-                // ... (thêm các trường khác)
+                formData.append('github', userData.github);
+                formData.append('figma', userData.figma);
+                formData.append('report', userData.report);
+                formData.append('email', userData.email);
+                formData.append('api', userData.api);
                 
-                console.log('Đang gửi dữ liệu lên server...');
+                console.log('Đang gửi dữ liệu lên server:', formData);
                 
-                // 2. GỌI API LƯU DỮ LIỆU
-                // Giả định hàm này gọi API backend (cần được triển khai)
+                // 3. GỌI API LƯU DỮ LIỆU (Cần triển khai trong file api.js)
                 // const result = await updateProfileAPI(formData); 
                 
-                // Sau khi lưu thành công, cập nhật URL ảnh nếu backend trả về URL mới
-                // Ví dụ: setUserData(prev => ({...prev, avatarUrl: result.newAvatarUrl}));
-
-                // Reset file thô sau khi gửi
                 setAvatarFile(null); 
-
                 alert('Cập nhật hồ sơ thành công!');
 
             } catch (error) {
                 console.error("Lỗi khi lưu dữ liệu:", error);
                 alert('Lỗi khi cập nhật hồ sơ. Vui lòng thử lại.');
-                // Giữ nguyên isEditing nếu lưu thất bại
                 return; 
             }
         }
@@ -73,16 +68,14 @@ const Profile = () => {
         }));
     };
     
-    // --- HÀM XỬ LÝ CHỌN ẢNH MỚI ---
     const handleAvatarChange = (e) => {
         const file = e.target.files[0];
         if (file && file.type.startsWith('image/')) {
-            // LƯU TRỮ FILE THÔ ĐỂ GỬI LÊN SERVER SAU
             setAvatarFile(file); 
             
             const reader = new FileReader();
             reader.onloadend = () => {
-                // Chỉ cập nhật URL để xem trước (client-side preview)
+                // Cập nhật URL để xem trước
                 setUserData(prevData => ({
                     ...prevData,
                     avatarUrl: reader.result 
@@ -92,19 +85,66 @@ const Profile = () => {
         }
     };
     
-    // Hàm kích hoạt input file khi nhấn nút "Thay đổi"
     const triggerFileInput = () => {
-        fileInputRef.current.click();
+        if (isEditing) {
+             fileInputRef.current.click();
+        }
     };
+
+    // Hàm render giá trị hoặc input
+    const renderField = (name, type = 'text') => {
+        if (isEditing) {
+            return (
+                <input
+                    type={type}
+                    name={name}
+                    value={userData[name]}
+                    onChange={handleChange}
+                    readOnly={false}
+                    className="editable"
+                />
+            );
+        }
+        
+        // Chế độ Xem (Read-only)
+        const value = userData[name];
+        
+        // Xử lý đặc biệt cho các trường là URL
+        if (name === 'github' || name === 'figma' || name === 'api') {
+            return (
+                <a 
+                    href={value} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="profile-value profile-link"
+                >
+                    {value}
+                </a>
+            );
+        }
+        
+        // Trường thông thường (Full Name, Student ID, Email)
+        return (
+            <input
+                type={type}
+                value={value}
+                readOnly={true}
+                // Dùng một span hoặc div thay cho input nếu không muốn styling input
+                // return <div className="profile-value">{value}</div>;
+            />
+        );
+    };
+
 
     return (
         <div className="profile-page">
-            
             <div className="profile-card">
                 
                 <div className="profile-header">
+                    
                     <div className="avatar-section">
-                        <div className="avatar-placeholder">
+                        <div className="avatar-placeholder" onClick={triggerFileInput}>
+                            {/* Dùng URL xem trước nếu có file mới, nếu không dùng URL cũ */}
                             <img src={userData.avatarUrl} alt="Ảnh đại diện" className="profile-avatar"/>
                             
                             {/* INPUT FILE ẨN */}
@@ -114,10 +154,13 @@ const Profile = () => {
                                 onChange={handleAvatarChange}
                                 accept="image/*"
                                 style={{ display: 'none' }}
+                                disabled={!isEditing}
                             />
                         </div>
                         
-                        <button className="btn-secondary" onClick={triggerFileInput}>Thay đổi</button>
+                        {isEditing && (
+                           <button className="btn-secondary" onClick={triggerFileInput}>Thay đổi</button>
+                        )}
                     </div>
 
                     <div className="info-intro">
@@ -133,73 +176,53 @@ const Profile = () => {
                     </button>
                 </div>
 
-                {/* Phần Form chi tiết (Giữ nguyên) */}
+                {/* Phần Form chi tiết */}
                 <div className="profile-details">
                     
                     {/* HỌ VÀ TÊN */}
                     <div className="detail-row">
                         <label>Họ và tên</label>
-                        <input
-                            type="text"
-                            name="fullName"
-                            value={userData.fullName}
-                            onChange={handleChange}
-                            readOnly={!isEditing}
-                            className={isEditing ? 'editable' : ''}
-                        />
+                        {renderField('fullName')}
                     </div>
 
                     {/* MÃ SV */}
                     <div className="detail-row">
                         <label>Mã SV</label>
-                        <input
-                            type="text"
-                            name="studentId"
-                            value={userData.studentId}
-                            onChange={handleChange}
-                            readOnly={!isEditing}
-                            className={isEditing ? 'editable' : ''}
-                        />
+                        {renderField('studentId')}
                     </div>
 
                     {/* GITHUB */}
                     <div className="detail-row">
                         <label>Github</label>
-                        <input
-                            type="text"
-                            name="github"
-                            value={userData.github}
-                            onChange={handleChange}
-                            readOnly={!isEditing}
-                            className={isEditing ? 'editable' : ''}
-                        />
+                        {renderField('github')}
                     </div>
                     
                     {/* FIGMA */}
                     <div className="detail-row">
                         <label>Figma</label>
-                        <input
-                            type="text"
-                            name="figma"
-                            value={userData.figma}
-                            onChange={handleChange}
-                            readOnly={!isEditing}
-                            className={isEditing ? 'editable' : ''}
-                        />
+                        {renderField('figma')}
+                    </div>
+
+                    {/* REPORT */}
+                    <div className="detail-row">
+                        <label>Báo cáo</label>
+                         {renderField('report')}
                     </div>
                     
+                    {/* ⬅️ TRƯỜNG API ĐÃ ĐƯỢC THÊM VÀO ĐÂY */}
+                    <div className="detail-row">
+                        <label>API</label>
+                        {renderField('api')}
+                    </div>
+
                     {/* EMAIL */}
                     <div className="detail-row">
                         <label>Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={userData.email}
-                            onChange={handleChange}
-                            readOnly={!isEditing}
-                            className={isEditing ? 'editable' : ''}
-                        />
-                        <span className="email-icon">📧</span>
+                        {renderField('email', 'email')}
+                        {/* Biểu tượng Email chỉ nên hiện khi không chỉnh sửa */}
+                        {!isEditing && (
+                            <span className="email-icon">📧</span>
+                        )}
                     </div>
 
                 </div>
