@@ -1,35 +1,23 @@
 // backend/controllers/deviceController.js
 
-import { io, deviceStates } from "../server.js"; // ⚠️ import từ server.js
-import pool from '../dbConfig.js';
+import { io, deviceStates } from "../server.js"; 
 
 // --- ĐIỀU KHIỂN THIẾT BỊ ---
 export const controlDevice = async (req, res) => {
     try {
-        const mqttClient = req.app.get("mqttClient");
-        const db = req.app.get("db");      
-
+        const mqttClient = req.app.get("mqttClient");    
         const device = req.params.device; // light | fan | ac
-        const { status } = req.body;      // "on" hoặc "off" (chữ thường theo FE)
+        const { status } = req.body;      // "on" hoặc "off"
 
         const topic = `esp32/control/${device}`;
 
         // 1. Gửi lệnh MQTT tới ESP32
-        mqttClient.publish(topic, status.toUpperCase()); // ESP32 thường dùng ON/OFF
+        mqttClient.publish(topic, status.toUpperCase()); 
 
-        // 2. Cập nhật trạng thái thiết bị trong biến toàn cục
-        deviceStates[device] = status;
+        // 2. (Không update DB ở đây, chỉ phát socket tạm thời nếu muốn)
+        io.emit("pendingDevice", { device, status });
 
-        // 3. Phát lại cho tất cả frontend
-        io.emit("deviceStates", deviceStates);
-
-        // 4. Lưu lịch sử vào MySQL
-        await db.query(
-            "INSERT INTO Actions (Device, Status) VALUES (?, ?)",
-            [device, status]
-        );
-
-        res.json({ ok: true, device, status });
+        res.json({ ok: true, message: `Đã gửi lệnh ${status} tới ${device}, chờ phản hồi...` });
     } catch (err) {
         console.error("❌ Lỗi controlDevice:", err);
         res.status(500).json({ error: err.message });
@@ -50,10 +38,10 @@ export const getActions = async (req, res) => {
     }
 };
 
-// --- CẬP NHẬT HỒ SƠ ---
+// --- CẬP NHẬT HỒ SƠ (giữ nguyên) ---
 export const updateProfile = async (req, res) => {
     const db = req.app.get("db"); 
-    const userId = 1; // ⚠️ Tạm fix cứng
+    const userId = 1; 
 
     const { fullName, studentId, github, figma, email } = req.body;
     const newAvatarPath = req.file ? `/avatars/${req.file.filename}` : null;

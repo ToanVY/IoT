@@ -1,11 +1,8 @@
 // src/components/DeviceCard.jsx
-
 import React from 'react';
-import './DeviceCard.css'; // Sẽ tạo file này ở bước 3
+import './DeviceCard.css';
 
-const DeviceCard = ({ device, label, status, onToggle }) => {
-    
-    // Logic xác định trạng thái mới và icon/màu
+const DeviceCard = ({ device, label, status, onToggle, loading }) => {
     const newStatus = status === 'on' ? 'off' : 'on';
     const isDeviceOn = status === 'on';
     
@@ -30,8 +27,9 @@ const DeviceCard = ({ device, label, status, onToggle }) => {
     }
 
     const handleToggle = () => {
-        // Gọi hàm xử lý từ Dashboard.jsx để gửi lệnh đến backend
-        onToggle(device, newStatus);
+        if (!loading) {
+            onToggle(device, newStatus);
+        }
     };
 
     return (
@@ -44,13 +42,19 @@ const DeviceCard = ({ device, label, status, onToggle }) => {
                 Trạng thái: <strong>{isDeviceOn ? 'ĐANG BẬT' : 'ĐANG TẮT'}</strong>
             </p>
             
-            {/* Nút Bật/Tắt */}
-            <button 
-                className={`toggle-button toggle-${newStatus}`}
-                onClick={handleToggle}
-            >
-                {isDeviceOn ? 'TẮT' : 'BẬT'}
-            </button>
+            {/* Nút Bật/Tắt hoặc Loading */}
+            {loading ? (
+                <button className="toggle-button btn-loading" disabled>
+                    <span className="spinner"></span>
+                </button>
+            ) : (
+                <button 
+                    className={`toggle-button toggle-${newStatus}`}
+                    onClick={handleToggle}
+                >
+                    {isDeviceOn ? 'TẮT' : 'BẬT'}
+                </button>
+            )}
         </div>
     );
 };

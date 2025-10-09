@@ -15,7 +15,7 @@ const Profile = () => {
         figma: 'https://www.figma.com/design/R03h45Jnuu58OsxUIhrxlv/IoT?node-id=0-1',
         email: 'letoan5204@gmail.com',
         api: 'http://localhost:5000/apis/', // Trường API đã được thêm
-        report: 'http://localhost/phpmyadmin/index.php?route=/table/structure&db=iotdb&table=actions',
+        report: 'https://1drv.ms/b/c/06f6a8e015d96e1b/EUp349L4M5BGlxVVKwpnv4cBTZN-3q6cpgqRJmbUz5lHRA?e=THfKV4',
         avatarUrl: '/assets/profile-avatar.png'
     });
 
@@ -206,7 +206,7 @@ const Profile = () => {
                     {/* REPORT */}
                     <div className="detail-row">
                         <label>Báo cáo</label>
-                         {renderField('report')}
+                        {renderField('report')}
                     </div>
                     
                     {/* ⬅️ TRƯỜNG API ĐÃ ĐƯỢC THÊM VÀO ĐÂY */}

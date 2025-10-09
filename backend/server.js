@@ -81,23 +81,16 @@ const mqttClient = mqtt.connect(MQTT_URL, {
 
 mqttClient.on("connect", () => {
     console.log("✅ ESP32 Connected to MQTT broker");
+
     mqttClient.subscribe("esp32/sensor/data", (err) => {
         if (!err) console.log("📡 Subscribed to esp32/sensor/data");
     });
 
-    // khi ESP32 kết nối lại, gửi trạng thái cũ cho frontend
-    io.emit("deviceStates", deviceStates);
-});
+    // ✅ subscribe thêm topic phản hồi trạng thái thiết bị
+    mqttClient.subscribe("esp32/state/+", (err) => {
+        if (!err) console.log("📡 Subscribed to esp32/state/+");
+    });
 
-mqttClient.on("offline", () => {
-    console.log("⚠️ ESP32 disconnected");
-    deviceStates = { light: "off", fan: "off", ac: "off" };
-    io.emit("deviceStates", deviceStates);
-});
-
-mqttClient.on("error", (err) => {
-    console.error("❌ MQTT Error:", err);
-    deviceStates = { light: "off", fan: "off", ac: "off" };
     io.emit("deviceStates", deviceStates);
 });
 
@@ -114,6 +107,26 @@ mqttClient.on("message", async (topic, message) => {
             await pool.execute(
                 "INSERT INTO Sensors (temperature, humidity, light) VALUES (?, ?, ?)",
                 [temperature, humidity, light]
+            );
+        }
+
+        // ✅ Xử lý phản hồi trạng thái thiết bị
+        else if (topic.startsWith("esp32/state/")) {
+            const device = topic.split("/")[2]; // light | fan | ac
+            const status = message.toString().toLowerCase(); // on/off
+
+            console.log(`📥 Trạng thái ${device}: ${status}`);
+
+            // Cập nhật biến toàn cục
+            deviceStates[device] = status;
+
+            // Phát lại cho tất cả FE
+            io.emit("deviceStates", deviceStates);
+
+            // Lưu lịch sử vào DB
+            await pool.execute(
+                "INSERT INTO Actions (Device, Status) VALUES (?, ?)",
+                [device, status.toUpperCase()]
             );
         }
     } catch (err) {
