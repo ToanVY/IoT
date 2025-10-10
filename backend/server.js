@@ -3,7 +3,6 @@
 import express from "express";
 import dotenv from "dotenv";
 import mqtt from "mqtt";
-import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import multer from "multer";
@@ -11,7 +10,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
-
+import cors from "cors";
 import pool from "./dbConfig.js";
 import deviceRoutes from "./routes/devices.js";
 import sensorRoutes from "./routes/sensors.js";
@@ -20,6 +19,10 @@ import { controlDevice, getActions, updateProfile } from "./controllers/deviceCo
 dotenv.config();
 const app = express();
 const httpServer = createServer(app);
+
+// Middleware
+app.use(cors()); // Cho phép tất cả origin
+app.use(express.json());
 
 // ================== CẤU HÌNH __dirname TRONG ES MODULE ==================
 const __filename = fileURLToPath(import.meta.url);
@@ -52,15 +55,8 @@ export const io = new Server(httpServer, {
 
 io.on('connection', (socket) => {
     console.log(`🌐 Frontend client connected: ${socket.id}`);
-    // gửi trạng thái thiết bị hiện tại cho client mới kết nối
     socket.emit("deviceStates", deviceStates);
 });
-
-// ================== CẤU HÌNH EXPRESS & MIDDLEWARE ==================
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ================== QUẢN LÝ TRẠNG THÁI THIẾT BỊ ==================
 export let deviceStates = {
@@ -85,8 +81,9 @@ mqttClient.on("connect", () => {
     mqttClient.subscribe("esp32/sensor/data", (err) => {
         if (!err) console.log("📡 Subscribed to esp32/sensor/data");
     });
+    
 
-    // ✅ subscribe thêm topic phản hồi trạng thái thiết bị
+    // ✅ subscribe topic phản hồi trạng thái thiết bị
     mqttClient.subscribe("esp32/state/+", (err) => {
         if (!err) console.log("📡 Subscribed to esp32/state/+");
     });
@@ -110,7 +107,7 @@ mqttClient.on("message", async (topic, message) => {
             );
         }
 
-        // ✅ Xử lý phản hồi trạng thái thiết bị
+        // ✅ Chỉ khi nhận phản hồi từ ESP32 mới cập nhật + lưu DB
         else if (topic.startsWith("esp32/state/")) {
             const device = topic.split("/")[2]; // light | fan | ac
             const status = message.toString().toLowerCase(); // on/off
