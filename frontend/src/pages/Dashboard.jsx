@@ -99,7 +99,7 @@ const Dashboard = () => {
       </div>
 
       {/* Chart */}
-      <div className="chart-area card">
+      <div className="chart-wrapper card">
         <SensorChart sensorData={chartData} />
       </div>
 

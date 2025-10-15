@@ -63,9 +63,17 @@
 
 /* Chart */
 .chart-area {
+  width: 80%;
   height: 250px;
   padding: 15px;
   flex: 1;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+.chart-wrapper canvas {
+  width: 100% !important;  /* ép canvas chart full */
+  height: 420px !important; /* bạn có thể tăng/giảm chiều cao */
 }
 
 /* Device controls */

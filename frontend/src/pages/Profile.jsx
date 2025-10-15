@@ -209,7 +209,7 @@ const Profile = () => {
                         {renderField('report')}
                     </div>
                     
-                    {/* ⬅️ TRƯỜNG API ĐÃ ĐƯỢC THÊM VÀO ĐÂY */}
+                    {/* API */}
                     <div className="detail-row">
                         <label>API</label>
                         {renderField('api')}
@@ -219,7 +219,7 @@ const Profile = () => {
                     <div className="detail-row">
                         <label>Email</label>
                         {renderField('email', 'email')}
-                        {/* Biểu tượng Email chỉ nên hiện khi không chỉnh sửa */}
+
                         {!isEditing && (
                             <span className="email-icon">📧</span>
                         )}

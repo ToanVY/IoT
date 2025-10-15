@@ -1,27 +1,24 @@
 // backend/controllers/deviceController.js
 
-import { io, deviceStates } from "../server.js"; 
 
 // --- ĐIỀU KHIỂN THIẾT BỊ ---
 export const controlDevice = async (req, res) => {
-    try {
-        const mqttClient = req.app.get("mqttClient");    
-        const device = req.params.device; // light | fan | ac
-        const { status } = req.body;      // "on" hoặc "off"
+  try {
+    const mqttClient = req.app.get("mqttClient");
+    const io = req.app.get("io"); // ✅ lấy io từ app
+    const device = req.params.device;
+    const { status } = req.body;
 
-        const topic = `esp32/control/${device}`;
+    const topic = `esp32/control/${device}`;
+    mqttClient.publish(topic, status.toUpperCase());
 
-        // 1. Gửi lệnh MQTT tới ESP32
-        mqttClient.publish(topic, status.toUpperCase()); 
+    io.emit("pendingDevice", { device, status });
 
-        // 2. (Không update DB ở đây, chỉ phát socket tạm thời nếu muốn)
-        io.emit("pendingDevice", { device, status });
-
-        res.json({ ok: true, message: `Đã gửi lệnh ${status} tới ${device}, chờ phản hồi...` });
-    } catch (err) {
-        console.error("❌ Lỗi controlDevice:", err);
-        res.status(500).json({ error: err.message });
-    }
+    res.json({ ok: true, message: `Đã gửi lệnh ${status} tới ${device}, chờ phản hồi...` });
+  } catch (err) {
+    console.error("❌ Lỗi controlDevice:", err);
+    res.status(500).json({ error: err.message });
+  }
 };
 
 // --- LỊCH SỬ HÀNH ĐỘNG ---
