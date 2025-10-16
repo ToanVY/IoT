@@ -1,8 +1,7 @@
-// src/pages/Profile.jsx (Final Version)
+// src/pages/Profile.jsx
 
 import React, { useState, useRef } from 'react';
 import './Profile.css';
-// import { updateProfileAPI } from '../api'; // Giả định hàm API
 
 const Profile = () => {
     const fileInputRef = useRef(null);
@@ -12,9 +11,9 @@ const Profile = () => {
         fullName: 'Lê Đức Toàn',
         studentId: 'B22DCCN730',
         github: 'https://github.com/ToanVY/IoT.git',
-        figma: 'https://www.figma.com/design/R03h45Jnuu58OsxUIhrxlv/IoT?node-id=0-1',
+        figma: 'https://www.figma.com/design/R03h45Jnuu58osxU1hrxlv/IoT?node-id=0-1&p=f&t=RFtcLz4QohAudTU7-0',
         email: 'letoan5204@gmail.com',
-        api: 'http://localhost:5000/apis/', // Trường API đã được thêm
+        api: 'http://localhost:5000/api-docs/',
         report: 'https://1drv.ms/b/c/06f6a8e015d96e1b/EUp349L4M5BGlxVVKwpnv4cBTZN-3q6cpgqRJmbUz5lHRA?e=THfKV4',
         avatarUrl: '/assets/profile-avatar.png'
     });
@@ -42,9 +41,6 @@ const Profile = () => {
                 formData.append('api', userData.api);
                 
                 console.log('Đang gửi dữ liệu lên server:', formData);
-                
-                // 3. GỌI API LƯU DỮ LIỆU (Cần triển khai trong file api.js)
-                // const result = await updateProfileAPI(formData); 
                 
                 setAvatarFile(null); 
                 alert('Cập nhật hồ sơ thành công!');
@@ -129,8 +125,6 @@ const Profile = () => {
                 type={type}
                 value={value}
                 readOnly={true}
-                // Dùng một span hoặc div thay cho input nếu không muốn styling input
-                // return <div className="profile-value">{value}</div>;
             />
         );
     };
@@ -144,7 +138,6 @@ const Profile = () => {
                     
                     <div className="avatar-section">
                         <div className="avatar-placeholder" onClick={triggerFileInput}>
-                            {/* Dùng URL xem trước nếu có file mới, nếu không dùng URL cũ */}
                             <img src={userData.avatarUrl} alt="Ảnh đại diện" className="profile-avatar"/>
                             
                             {/* INPUT FILE ẨN */}

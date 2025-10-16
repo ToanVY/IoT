@@ -49,7 +49,7 @@ paths:
           name: limit
           schema:
             type: integer
-            default: 50
+            default: 1000
           description: Số lượng bản ghi lịch sử muốn lấy.
       responses:
         '200':
@@ -99,7 +99,7 @@ paths:
     post:
       tags:
         - User Profile
-      summary: Cập nhật thông tin hồ sơ và ảnh đại diện
+      summary: Cập nhật thông tin hồ sơ.
       description: Dùng để cập nhật tên, mã SV và tải lên file ảnh đại diện mới.
       requestBody:
         required: true
@@ -108,34 +108,14 @@ paths:
             schema:
               type: object
               properties:
-                avatar:
+                Họ tên:
                   type: string
-                  format: binary
-                  description: File ảnh đại diện (được xử lý bởi Multer).
-                fullName:
+                Mã SV:
                   type: string
-                studentId:
+                Email:
                   type: string
-                  description: Mã sinh viên (dùng để đặt tên file ảnh).
       responses:
         '200':
-          description: Hồ sơ và ảnh đại diện được cập nhật thành công.
+          description: Hồ sơ được cập nhật thành công.
         '400':
           description: Lỗi dữ liệu hoặc định dạng file (ví dụ: file quá lớn).
-
-  /uploads/{path}:
-    get:
-      tags:
-        - Static Files
-      summary: Tải ảnh đại diện người dùng
-      description: Endpoint để Frontend tải các file ảnh đã được Backend lưu trữ.
-      parameters:
-        - in: path
-          name: path
-          required: true
-          schema:
-            type: string
-          description: Đường dẫn tương đối của file (ví dụ: 'avatars/B22DCCN730-16788888.png').
-      responses:
-        '200':
-          description: Trả về file ảnh.

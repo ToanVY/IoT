@@ -7,6 +7,10 @@ import mysql from "mysql2/promise";
 import cors from "cors";
 import sensorRoutes from "./routes/sensors.js";
 import deviceRoutes from "./routes/devices.js";
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 app.use(cors());
@@ -146,6 +150,11 @@ app.use("/api/devices", deviceRoutes);
 
 // ================== START SERVER ==================
 const PORT = 5000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const swaggerDocument = YAML.load(path.join(__dirname, "swagger.yaml"));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 server.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
