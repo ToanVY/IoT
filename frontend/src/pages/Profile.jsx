@@ -14,7 +14,7 @@ const Profile = () => {
         figma: 'https://www.figma.com/design/R03h45Jnuu58osxU1hrxlv/IoT?node-id=0-1&p=f&t=RFtcLz4QohAudTU7-0',
         email: 'letoan5204@gmail.com',
         api: 'http://localhost:5000/api-docs/',
-        report: 'https://1drv.ms/b/c/06f6a8e015d96e1b/EUp349L4M5BGlxVVKwpnv4cBTZN-3q6cpgqRJmbUz5lHRA?e=THfKV4',
+        report: 'https://docs.google.com/document/d/1gyWN7DXbhU-TnUwg1V2T7B5qwaNE6I6P/edit?usp=sharing&ouid=108706022176659871158&rtpof=true&sd=true',
         avatarUrl: '/assets/profile-avatar.png'
     });
 

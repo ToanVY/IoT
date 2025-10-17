@@ -1,24 +1,20 @@
-// src/pages/DataSensor.jsx
-
 import React, { useEffect, useState, useMemo } from 'react';
-import { getSensorData } from '../api'; // Giả định hàm API
+import { getSensorData } from '../api'; // Hàm API lấy dữ liệu
 import Table from '../components/Table';
-import './ActionsHistory.css'; // SỬ DỤNG CSS ĐỒNG BỘ
+import './ActionsHistory.css';
 
 const DataSensor = () => {
     const [rawSensorData, setRawSensorData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchType, setSearchType] = useState('all');
-    
-    // Tên cột khớp với keys từ MySQL
     const [sortBy, setSortBy] = useState('created_at');
     const [sortOrder, setSortOrder] = useState('desc');
 
-    // Tiêu đề cột và tùy chọn tìm kiếm
+    // Danh sách tiêu đề cột
     const sensorHeaders = ['id', 'temperature', 'humidity', 'light', 'created_at'];
 
-    // ĐÃ THÊM TÙY CHỌN TÌM KIẾM THEO ID
+    // Các tùy chọn tìm kiếm
     const searchOptions = [
         { value: 'all', label: 'Tất cả' },
         { value: 'created_at', label: 'Ngày/Thời gian' },
@@ -27,22 +23,25 @@ const DataSensor = () => {
         { value: 'light', label: 'Ánh sáng' },
         { value: 'id', label: 'ID' },
     ];
-    
-    // Hàm định dạng thời gian
+
+    // 🕒 Hàm định dạng thời gian "HH:MM:SS DD/MM/YYYY"
     const formatTime = (timeString) => {
         if (!timeString) return '--';
         const date = new Date(timeString);
-        return date.toLocaleString('vi-VN', {
-            year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit', second: '2-digit'
-        });
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = date.getFullYear();
+        const hh = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        const ss = String(date.getSeconds()).padStart(2, '0');
+        return `${hh}:${min}:${ss} ${dd}/${mm}/${yyyy}`;
     };
 
+    // 🔄 Lấy dữ liệu cảm biến từ Backend
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Tải 1000 bản ghi (hoặc số lượng bạn cần)
-                const data = await getSensorData(1000); 
+                const data = await getSensorData(1000);
                 setRawSensorData(data);
             } catch (error) {
                 console.error("Lỗi tải dữ liệu cảm biến:", error);
@@ -54,53 +53,66 @@ const DataSensor = () => {
         fetchData();
     }, []);
 
-    // --- LOGIC TÌM KIẾM VÀ SẮP XẾP ---
+    // ⚙️ Lọc và sắp xếp dữ liệu hiển thị
     const displayData = useMemo(() => {
-        let currentData = Array.isArray(rawSensorData) ? [...rawSensorData] : []; 
+        let currentData = Array.isArray(rawSensorData) ? [...rawSensorData] : [];
 
-        // 1. Lọc (Filter) - Giữ nguyên logic tìm kiếm đã tối ưu
+        // 1️⃣ Lọc dữ liệu
         if (searchTerm) {
-            const lowerSearch = searchTerm.toLowerCase();
-            
+            const lowerSearch = searchTerm.toLowerCase().trim();
+
             currentData = currentData.filter(item => {
-                const formattedTime = formatTime(item.created_at).toLowerCase();
-                
+                const rawTime = item.created_at;
+                if (!rawTime) return false;
+
+                const dateObj = new Date(rawTime);
+                const formattedTime = formatTime(rawTime).toLowerCase();
+
+                // Tạo các dạng ngày/giờ để tìm kiếm
+                const dateVN = dateObj.toLocaleDateString('vi-VN'); // 03/10/2025
+                const timeVN = dateObj.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }); // 00:23
+                const isoFormat = dateObj.toISOString().replace('T', ' ').slice(0, 19); // 2025-10-03 00:23:01
+
+                const combinedFormats = [
+                    formattedTime,              // 03/10/2025 00:23:01
+                    `${timeVN} ${dateVN}`,      // 00:23 03/10/2025
+                    `${dateVN} ${timeVN}`,      // 03/10/2025 00:23
+                    dateVN,                     // 03/10/2025
+                    timeVN,                     // 00:23
+                    isoFormat                   // 2025-10-03 00:23:01
+                ].map(f => f.toLowerCase());
+
                 if (searchType === 'all') {
                     const searchFields = sensorHeaders.map(key => String(item[key] ?? '').toLowerCase());
-                    const fullSearchString = searchFields.join(' ') + ' ' + formattedTime;
-                    
+                    const fullSearchString = [...searchFields, ...combinedFormats].join(' ');
                     return fullSearchString.includes(lowerSearch);
-                    
-                } else if (searchType === 'created_at') {
-                    return formattedTime.includes(lowerSearch);
-                    
-                } else {
+                } 
+                else if (searchType === 'created_at') {
+                    return combinedFormats.some(f => f.includes(lowerSearch));
+                } 
+                else {
                     const value = item[searchType];
                     return String(value ?? '').toLowerCase().includes(lowerSearch);
                 }
             });
         }
 
-        // 2. Sắp xếp (Sort) - ĐÃ CẬP NHẬT LOGIC SẮP XẾP SỐ
+        // 2️⃣ Sắp xếp dữ liệu
         if (sortBy) {
             currentData.sort((a, b) => {
                 const aValue = a[sortBy];
                 const bValue = b[sortBy];
-                
-                // Các cột cần sắp xếp dưới dạng số
+
                 const numericColumns = ['id', 'temperature', 'humidity', 'light'];
 
-                // --- Sắp xếp Số ---
                 if (numericColumns.includes(sortBy)) {
                     const numA = parseFloat(aValue);
                     const numB = parseFloat(bValue);
-                    
                     if (numA < numB) return sortOrder === 'asc' ? -1 : 1;
                     if (numA > numB) return sortOrder === 'asc' ? 1 : -1;
                     return 0;
                 }
 
-                // --- Sắp xếp Thời gian ---
                 if (sortBy === 'created_at') {
                     const aTime = new Date(aValue).getTime();
                     const bTime = new Date(bValue).getTime();
@@ -108,34 +120,31 @@ const DataSensor = () => {
                     if (aTime > bTime) return sortOrder === 'asc' ? 1 : -1;
                     return 0;
                 }
-                
-                // --- Sắp xếp Chuỗi (còn lại) ---
+
                 const valA = String(aValue ?? '').toLowerCase();
                 const valB = String(bValue ?? '').toLowerCase();
-
                 if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
                 if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
                 return 0;
             });
         }
-        
-        // 3. CHUẨN BỊ DỮ LIỆU ĐỂ HIỂN THỊ (Định dạng thời gian)
+
+        // 3️⃣ Định dạng dữ liệu hiển thị
         const formattedData = currentData.map(item => ({
             ...item,
-            created_at: formatTime(item.created_at) // Định dạng thời gian
+            created_at: formatTime(item.created_at)
         }));
 
-        return formattedData; 
-    }, [rawSensorData, searchTerm, searchType, sortBy, sortOrder]); 
-    
-    // ---------------------------------------------------------------
-    
+        return formattedData;
+    }, [rawSensorData, searchTerm, searchType, sortBy, sortOrder]);
+
+    // 🔁 Thay đổi sắp xếp
     const handleSortChange = (newSortBy) => {
         if (sortBy === newSortBy) {
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
         } else {
             setSortBy(newSortBy);
-            setSortOrder('desc'); 
+            setSortOrder('desc');
         }
     };
 
@@ -145,16 +154,15 @@ const DataSensor = () => {
 
     return (
         <div className="actions-history-page">
-            <h2>Bảng Dữ liệu Cảm biến</h2> 
-            
-            <div className="table-controls"> 
+            <h2>Bảng Dữ liệu Cảm biến</h2>
+
+            <div className="table-controls">
                 <div className="search-group">
-                    
-                    {/* DROPDOWN CHỌN TYPE (LOẠI TÌM KIẾM) */}
-                    <select 
-                        value={searchType} 
-                        onChange={(e) => setSearchType(e.target.value)} 
-                        className="filter-select" 
+                    {/* Dropdown chọn loại tìm kiếm */}
+                    <select
+                        value={searchType}
+                        onChange={(e) => setSearchType(e.target.value)}
+                        className="filter-select"
                     >
                         {searchOptions.map(option => (
                             <option key={option.value} value={option.value}>
@@ -163,24 +171,24 @@ const DataSensor = () => {
                         ))}
                     </select>
 
-                    {/* INPUT TÌM KIẾM */}
+                    {/* Ô nhập từ khóa tìm kiếm */}
                     <input
                         type="text"
                         placeholder={`Tìm kiếm trong ${currentSearchLabel}...`}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    
+
                     <button className="search-button">Search</button>
                 </div>
             </div>
 
-            <div className="table-container"> 
-                <Table 
-                    headers={sensorHeaders} 
-                    data={displayData} 
+            <div className="table-container">
+                <Table
+                    headers={sensorHeaders}
+                    data={displayData}
                     title="Bảng Dữ liệu Cảm biến"
-                    onSortChange={handleSortChange} 
+                    onSortChange={handleSortChange}
                     sortBy={sortBy}
                     sortOrder={sortOrder}
                 />
